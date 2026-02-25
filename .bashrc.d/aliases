@@ -1,0 +1,45 @@
+
+# ranger
+alias r='ranger'
+ranger_cd() {
+    temp_file="$(mktemp -t "ranger_cd.XXXXXXXXXX")"
+    ranger --choosedir="$temp_file" -- "${@:-$PWD}"
+    if chosen_dir="$(cat -- "$temp_file")" && [ -n "$chosen_dir" ] && [ "$chosen_dir" != "$PWD" ]; then
+        cd -- "$chosen_dir"
+    fi
+    rm -f -- "$temp_file"
+}
+
+# This binds Ctrl-O to ranger_cd:
+bind '"\C-o":"ranger_cd\C-m"'
+
+alias rcd='ranger_cd'
+
+
+# navigation
+alias '..'='cd ..'
+alias '...'='cd ../..'
+alias '....'='cd ../../..'
+alias '.....'='cd ../../../..'
+
+alias cdp='cd ~/projects/platform'
+
+
+# git
+alias gs='git status'
+alias gc='git commit -m'
+alias ga='git add'
+alias gaa='git add .'
+alias gph='git push'
+alias gpl='git pull'
+
+# other
+alias n='nvim'
+alias hg='history | grep'
+alias h='history'
+alias e='exit'
+alias c='clear'
+
+alias dotfiles='git --git-dir=$HOME/.myconf/ --work-tree=$HOME'
+
+
