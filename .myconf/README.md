@@ -2,5 +2,7 @@
 
 ## Setup
 ```
-git clone --recurse-submodules --separate-git-dir=${HOME}/.myconf https://github.com/AlmazShai/dotfiles.git
+git clone --recurse-submodules --bare https://github.com/AlmazShai/dotfiles.git $HOME/.dotfiles
+alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+config checkout
 ```
