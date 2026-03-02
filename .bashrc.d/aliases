@@ -42,7 +42,7 @@ alias e='exit'
 alias c='clear'
 
 # dotfiles
-alias dotfiles='git --git-dir=$HOME/.myconf/ --work-tree=$HOME'
+alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias ds='dotfiles status'
 alias da='dotfiles add'
 alias dc='dotfiles commit -m'
