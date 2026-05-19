@@ -49,3 +49,10 @@ alias dc='dotfiles commit -m'
 alias dph='dotfiles push'
 alias dpl='dotfiles pull'
 
+# aws
+alias als='aws s3 ls'
+alias acp='asw s3 cp'
+
+# tmux
+alias t='tmux'
+alias ta='tmux a'
