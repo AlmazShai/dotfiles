@@ -51,7 +51,7 @@ alias dpl='dotfiles pull'
 
 # aws
 alias als='aws s3 ls'
-alias acp='asw s3 cp'
+alias acp='aws s3 cp'
 
 # tmux
 alias t='tmux'
