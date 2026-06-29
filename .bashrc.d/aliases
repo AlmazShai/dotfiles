@@ -46,9 +46,12 @@ alias rp='realpath'
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias ds='dotfiles status'
 alias da='dotfiles add'
+alias daa='dotfiles add ~/.bashrc.d/aliases'
 alias dc='dotfiles commit -m'
 alias dph='dotfiles push'
-alias dpl='dotfiles pull'
+alias dpl='dotfiles pull && source ~/.bashrc'
+
+alias am='n ~/.bashrc.d/aliases'
 
 # aws
 alias als='aws s3 ls'
