@@ -40,7 +40,7 @@ alias hg='history | grep'
 alias h='history'
 alias e='exit'
 alias c='clear'
-aliac rp='realpath'
+alias rp='realpath'
 
 # dotfiles
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
