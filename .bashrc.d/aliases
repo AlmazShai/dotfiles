@@ -12,6 +12,10 @@ ranger_cd() {
 
 alias rcd='ranger_cd'
 
+# history grep
+alias hg='history | grep'
+hgt() { history | grep "$1" | tail -20; }
+
 # basic
 alias ll='ls -alF'
 
@@ -36,7 +40,6 @@ alias gsw='git switch'
 # other
 alias n='nvim'
 alias v='vim'
-alias hg='history | grep'
 alias h='history'
 alias e='exit'
 alias c='clear'
