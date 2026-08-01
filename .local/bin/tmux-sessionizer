@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+# Create or attach a tmux session for a registered project.
+#
+#   tmux-sessionizer             pick a project interactively
+#   tmux-sessionizer platform    jump straight to the first match
+#   tmux-sessionizer add         register the current directory
+#
+# One session per project, named after its directory. Running this for a project
+# that already has a session switches to it rather than starting a second one,
+# which is what makes it safe to bind to a key and mash.
+#
+# Nothing is discovered automatically: a project is on the list because you ran
+# `add` in it. The list is ~/.config/tmux/projects, one path per line, and it is
+# a plain text file you can edit to remove entries.
+
+set -uo pipefail
+
+CONFIG="${TMUX_SESSIONIZER_PROJECTS:-$HOME/.config/tmux/projects}"
+
+die() {
+    printf 'tmux-sessionizer: %s\n' "$1" >&2
+    exit 1
+}
+
+short() { printf '%s' "${1/#$HOME/\~}"; }
+
+# Registered directories that still exist. Entries whose directory has gone are
+# skipped rather than reported, so a deleted checkout does not turn every jump
+# into an error message.
+projects() {
+    [[ -f "$CONFIG" ]] || return 0
+    local line
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line%%#*}"
+        line="${line#"${line%%[![:space:]]*}"}"
+        line="${line%"${line##*[![:space:]]}"}"
+        [[ -z "$line" ]] && continue
+        line="${line/#\~/$HOME}"
+        line="${line%/}"
+        [[ -d "$line" ]] && printf '%s\n' "$line"
+    done <"$CONFIG" | awk '!seen[$0]++' | sort
+}
+
+cmd_add() {
+    local dir
+    dir="$(pwd -P)" || die "cannot determine the current directory"
+
+    mkdir -p "$(dirname "$CONFIG")" || die "cannot create $(dirname "$CONFIG")"
+    if [[ ! -f "$CONFIG" ]]; then
+        {
+            printf '# Projects that tmux-sessionizer offers, one path per line.\n'
+            printf '# Added by `tp add`. Delete a line to unregister it.\n'
+            printf '# Paths that no longer exist are ignored.\n\n'
+        } >"$CONFIG"
+    fi
+
+    if printf '%s\n' "$(projects)" | grep -qxF -- "$dir"; then
+        printf 'already registered: %s\n' "$(short "$dir")"
+        return 0
+    fi
+
+    printf '%s\n' "$dir" >>"$CONFIG" || die "cannot write to $CONFIG"
+    printf 'added: %s\n' "$(short "$dir")"
+}
+
+select_dir() {
+    local query="${1:-}" list
+    list="$(projects)"
+    [[ -n "$list" ]] ||
+        die "no projects registered yet -- cd into one and run: tp add"
+
+    if [[ -n "$query" ]]; then
+        local match
+        match="$(printf '%s\n' "$list" | grep -iF -m1 -- "$query")" ||
+            match="$(printf '%s\n' "$list" | grep -i -m1 -- "$query")" ||
+            die "no project matches '$query'"
+        printf '%s' "$match"
+        return
+    fi
+
+    if command -v fzf >/dev/null 2>&1; then
+        # Paths are long and all share the home prefix, so shorten for display
+        # and put it back on the way out.
+        printf '%s\n' "$list" |
+            sed "s|^$HOME|~|" |
+            fzf --prompt='project > ' --reverse --height=100% |
+            sed "s|^~|$HOME|"
+        return
+    fi
+
+    # fzf is the intended interface; this keeps the command usable without it.
+    local -a opts=()
+    while IFS= read -r line; do opts+=("$line"); done <<<"$list"
+    local i
+    for i in "${!opts[@]}"; do
+        printf '%3d  %s\n' "$((i + 1))" "$(short "${opts[$i]}")" >&2
+    done
+    printf 'project number (empty to cancel): ' >&2
+    local n
+    read -r n
+    [[ -z "$n" ]] && return 0
+    [[ "$n" =~ ^[0-9]+$ ]] && ((n >= 1 && n <= ${#opts[@]})) || die "not a listed number: $n"
+    printf '%s' "${opts[$((n - 1))]}"
+}
+
+# tmux forbids `.` and `:` in session names, and spaces make them a chore to
+# type at the command prompt.
+sanitize() {
+    local s="${1//[.:]/_}"
+    printf '%s' "${s// /_}"
+}
+
+session_for() {
+    local dir="$1" name existing
+    name="$(sanitize "$(basename "$dir")")"
+    # The trailing colon matters: -t here is a target-pane, and a bare "=name"
+    # does not resolve as one, so tmux answers with an empty string and exit 0.
+    # "=name:" qualifies it as a session and actually reports the path.
+    existing="$(tmux display-message -p -t "=$name:" '#{session_path}' 2>/dev/null)" || true
+    if [[ -n "$existing" && "$existing" != "$dir" ]]; then
+        # Two projects share a basename. Qualify with the parent directory
+        # rather than silently dropping this one into the other's session.
+        name="$(sanitize "$(basename "$(dirname "$dir")")")-$name"
+    fi
+    printf '%s' "$name"
+}
+
+open_project() {
+    local dir
+    dir="$(select_dir "${1:-}")" || exit 1
+    [[ -n "$dir" ]] || exit 0 # picker cancelled
+    [[ -d "$dir" ]] || die "$dir is not a directory"
+
+    local name
+    name="$(session_for "$dir")"
+
+    if ! tmux has-session -t "=$name" 2>/dev/null; then
+        tmux new-session -d -s "$name" -c "$dir"
+    fi
+
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux switch-client -t "=$name"
+    else
+        tmux attach-session -t "=$name"
+    fi
+}
+
+case "${1:-}" in
+add) cmd_add ;;
+-h | --help)
+    sed -n '2,14p' "$0" | sed 's|^# \{0,1\}||'
+    ;;
+*) open_project "${1:-}" ;;
+esac

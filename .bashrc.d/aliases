@@ -44,6 +44,7 @@ alias h='history'
 alias e='exit'
 alias c='clear'
 alias rp='realpath'
+alias ni='NVIM_APPNAME=nvim-ide nvim'
 
 # dotfiles
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
@@ -63,3 +64,14 @@ alias acp='aws s3 cp'
 # tmux
 alias t='tmux'
 alias ta='tmux a'
+# One session per project: pick one, or `tp platform` to go straight there.
+alias tp='tmux-sessionizer'
+alias tl='tmux list-sessions'
+# Kill a session by name, or pick one when called with no argument.
+tk() {
+    if [ -n "$1" ]; then
+        tmux kill-session -t "$1"
+    else
+        tmux list-sessions -F '#S' | fzf --prompt='kill session > ' | xargs -r tmux kill-session -t
+    fi
+}

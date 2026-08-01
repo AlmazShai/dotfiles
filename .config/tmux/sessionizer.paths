@@ -1,0 +1,31 @@
+# Projects that tmux-sessionizer offers, one shell glob per line.
+#
+#   ~ is expanded, only directories are kept, and duplicates are dropped.
+#   A line starting with ! excludes everything matching it.
+#
+# This is the file to edit when you start keeping repos somewhere new.
+
+# Repos and grouping folders directly under ~/projects.
+~/projects/*
+
+# base/, preds/, strats/ and deploy/ each hold several repos. Both levels are
+# worth a session: the group when you need to see its repos together, the repo
+# itself when you are working inside one.
+~/projects/base/*
+~/projects/preds/*
+~/projects/preds/*/*
+~/projects/strats/*
+~/projects/strats/*/*
+~/projects/deploy/*
+~/projects/deploy/ansible/*
+
+# Configs edited often enough to be worth jumping to.
+~/.config/nvim-ide
+~/.config/nvim
+
+# Build output, scratch space and language subtrees are not projects.
+!*/artifacts
+!*/artifacts/*
+!*/python
+!*/.nvim-clangd
+!*/node_modules
