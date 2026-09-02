@@ -53,7 +53,7 @@ alias da='dotfiles add'
 alias daa='dotfiles add ~/.bashrc.d/aliases'
 alias dc='dotfiles commit -m'
 alias dph='dotfiles push'
-alias dpl='dotfiles pull && source ~/.bashrc'
+alias dpl='dotfiles pull --recurse-submodules && source ~/.bashrc'
 
 alias am='n ~/.bashrc.d/aliases'
 
