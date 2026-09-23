@@ -43,12 +43,12 @@ alias v='vim'
 alias h='history'
 alias e='exit'
 alias c='clear'
-alias rp='realpath'
 alias ni='NVIM_APPNAME=nvim-ide nvim'
 alias rp='run-pipeline'
 alias rpp='run-pipeline-podman'
 alias rpa='run-pipeline-almaz'
 alias rppa='run-pipeline-podman-almaz'
+alias rl='realpath'
 
 # dotfiles
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
