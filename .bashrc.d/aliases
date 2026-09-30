@@ -49,6 +49,7 @@ alias rpp='run-pipeline-podman'
 alias rpa='run-pipeline-almaz'
 alias rppa='run-pipeline-podman-almaz'
 alias rl='realpath'
+alias lg='lazygit'
 
 # dotfiles
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
